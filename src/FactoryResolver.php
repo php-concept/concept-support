@@ -18,6 +18,9 @@ final class FactoryResolver
     }
 
     /**
+     * Optional dependency: absent when there is no factory or the factory
+     * resolves to null. A non-null result is still type-guarded.
+     *
      * @template T of object
      * @param (Closure(): mixed)|null $factory
      * @param class-string<T> $expected
@@ -29,6 +32,11 @@ final class FactoryResolver
             return null;
         }
 
-        return self::required($factory, $expected, $subject);
+        $value = $factory();
+        if ($value === null) {
+            return null;
+        }
+
+        return ContractGuard::instanceOf($value, $expected, $subject);
     }
 }
